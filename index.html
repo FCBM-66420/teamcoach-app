@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>TeamCoach Pro - Gestion d'équipe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- En-tête -->
+        <header>
+            <h1>⚽ TeamCoach Pro</h1>
+            <div class="user-role" id="userRoleDisplay">Mode: Coach</div>
+            <button id="switchRoleBtn" class="btn-switch">👥 Mode Joueur</button>
+        </header>
+
+        <!-- Panneau d'administration (coach/admin uniquement) -->
+        <div id="adminPanel" class="admin-panel">
+            <h2>✏️ Gestion des événements</h2>
+            <form id="eventForm" class="event-form">
+                <div class="form-group">
+                    <label>Type d'événement *</label>
+                    <select id="eventType" required>
+                        <option value="match_amical">⚽ Match amical</option>
+                        <option value="coupe">🏆 Coupe</option>
+                        <option value="tournoi">🎯 Tournoi</option>
+                        <option value="match_officiel">📋 Match officiel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Titre / Adversaire *</label>
+                    <input type="text" id="eventTitle" placeholder="Ex: VS Olympique Marseille" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date du match *</label>
+                        <input type="datetime-local" id="matchDateTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Heure convocation *</label>
+                        <input type="datetime-local" id="callTime" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Lieu de rencontre *</label>
+                    <input type="text" id="location" placeholder="Stade, terrain, adresse..." required>
+                </div>
+                <div class="form-group">
+                    <label>Notes supplémentaires (optionnel)</label>
+                    <textarea id="notes" rows="2" placeholder="Tenue, matériel, etc..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">➕ Créer l'événement</button>
+            </form>
+        </div>
+
+        <!-- Liste des événements -->
+        <div class="events-section">
+            <h2>📅 Événements à venir</h2>
+            <div id="eventsList" class="events-list">
+                <!-- Les événements seront injectés ici -->
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+
+        <!-- Pied de page infos -->
+        <footer>
+            <p>Statuts: ✅ Présent | ❌ Absent | ⏳ En attente</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
