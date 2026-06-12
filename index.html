@@ -3,71 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>TeamCoach Pro - Gestion d'équipe</title>
+    <title>TeamCoach Pro - Plateforme Multi-équipes</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- En-tête -->
-        <header>
-            <h1>⚽ TeamCoach Pro</h1>
-            <div class="user-role" id="userRoleDisplay">Mode: Coach</div>
-            <button id="switchRoleBtn" class="btn-switch">👥 Mode Joueur</button>
-        </header>
+    <div class="app-container" id="app">
+        <!-- Écran de connexion -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-card">
+                <h1>⚽ TeamCoach Pro</h1>
+                <p class="subtitle">Plateforme de gestion d'équipe</p>
+                
+                <div class="role-buttons">
+                    <button class="role-btn admin" onclick="showAdminCode()">👑 Admin</button>
+                    <button class="role-btn coach" onclick="showCoachLogin()">👥 Coach</button>
+                    <button class="role-btn player" onclick="showPlayerLogin()">🎮 Joueur</button>
+                </div>
 
-        <!-- Panneau d'administration (coach/admin uniquement) -->
-        <div id="adminPanel" class="admin-panel">
-            <h2>✏️ Gestion des événements</h2>
-            <form id="eventForm" class="event-form">
-                <div class="form-group">
-                    <label>Type d'événement *</label>
-                    <select id="eventType" required>
-                        <option value="match_amical">⚽ Match amical</option>
-                        <option value="coupe">🏆 Coupe</option>
-                        <option value="tournoi">🎯 Tournoi</option>
-                        <option value="match_officiel">📋 Match officiel</option>
-                    </select>
+                <div id="adminCodeDiv" class="login-form hidden">
+                    <input type="password" id="adminCode" placeholder="Code Admin" class="login-input">
+                    <button onclick="loginAsAdmin()" class="login-submit">Se connecter</button>
                 </div>
-                <div class="form-group">
-                    <label>Titre / Adversaire *</label>
-                    <input type="text" id="eventTitle" placeholder="Ex: VS Olympique Marseille" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Date du match *</label>
-                        <input type="datetime-local" id="matchDateTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Heure convocation *</label>
-                        <input type="datetime-local" id="callTime" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Lieu de rencontre *</label>
-                    <input type="text" id="location" placeholder="Stade, terrain, adresse..." required>
-                </div>
-                <div class="form-group">
-                    <label>Notes supplémentaires (optionnel)</label>
-                    <textarea id="notes" rows="2" placeholder="Tenue, matériel, etc..."></textarea>
-                </div>
-                <button type="submit" class="btn-primary">➕ Créer l'événement</button>
-            </form>
-        </div>
 
-        <!-- Liste des événements -->
-        <div class="events-section">
-            <h2>📅 Événements à venir</h2>
-            <div id="eventsList" class="events-list">
-                <!-- Les événements seront injectés ici -->
-                <div class="loading">Chargement...</div>
+                <div id="coachLoginDiv" class="login-form hidden">
+                    <input type="text" id="coachTeamCode" placeholder="Code équipe" class="login-input">
+                    <input type="password" id="coachPassword" placeholder="Mot de passe coach" class="login-input">
+                    <button onclick="loginAsCoach()" class="login-submit">Se connecter</button>
+                    <button class="btn-secondary" onclick="showCreateTeam()">➕ Créer une équipe</button>
+                </div>
+
+                <div id="playerLoginDiv" class="login-form hidden">
+                    <input type="text" id="playerTeamCode" placeholder="Code équipe" class="login-input">
+                    <input type="text" id="playerName" placeholder="Votre nom" class="login-input">
+                    <button onclick="requestToJoin()" class="login-submit">Demander à rejoindre</button>
+                </div>
+
+                <div id="createTeamDiv" class="login-form hidden">
+                    <input type="text" id="newTeamName" placeholder="Nom de l'équipe" class="login-input">
+                    <input type="text" id="newTeamCode" placeholder="Code d'accès (ex: TIGERS2024)" class="login-input">
+                    <input type="password" id="newCoachPassword" placeholder="Mot de passe coach" class="login-input">
+                    <button onclick="createTeam()" class="login-submit">Créer l'équipe</button>
+                    <button class="btn-secondary" onclick="showCoachLogin()">Retour</button>
+                </div>
             </div>
         </div>
 
-        <!-- Pied de page infos -->
-        <footer>
-            <p>Statuts: ✅ Présent | ❌ Absent | ⏳ En attente</p>
-        </footer>
+        <!-- Interface principale -->
+        <div id="mainApp" class="main-app hidden">
+            <!-- En-tête -->
+            <header>
+                <div class="logo">
+                    <h1>⚽ TeamCoach Pro</h1>
+                    <span id="teamBadge" class="team-badge"></span>
+                </div>
+                <div class="user-info">
+                    <span id="userNameDisplay"></span>
+                    <span id="userRoleBadge" class="role-badge"></span>
+                    <button id="logoutBtn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </header>
+
+            <!-- Navigation par onglets -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="events">🏆 Événements</button>
+                <button class="tab-btn" data-tab="locker">🚿 Vestiaire</button>
+                <button class="tab-btn" data-tab="players" id="playersTabBtn">👥 Joueurs</button>
+                <button class="tab-btn" data-tab="teams" id="teamsTabBtn">🌍 Toutes les équipes</button>
+            </div>
+
+            <!-- Onglet Événements -->
+            <div id="eventsTab" class="tab-content active">
+                <div id="adminEventPanel" class="admin-panel hidden">
+                    <h2>✏️ Créer un événement</h2>
+                    <form id="eventForm" class="event-form">
+                        <div class="form-group">
+                            <label>Type d'événement</label>
+                            <select id="eventType">
+                                <option value="match_amical">⚽ Match amical</option>
+                                <option value="coupe">🏆 Coupe</option>
+                                <option value="tournoi">🎯 Tournoi</option>
+                                <option value="match_officiel">📋 Match officiel</option>
+                                <option value="entrainement">🏋️ Entraînement</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Titre / Adversaire</label>
+                            <input type="text" id="eventTitle" placeholder="Ex: VS Olympique Marseille" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date et heure du match</label>
+                                <input type="datetime-local" id="matchDateTime" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Heure de convocation</label>
+                                <input type="datetime-local" id="callTime" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Lieu</label>
+                            <input type="text" id="location" placeholder="Stade, terrain..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea id="notes" rows="2" placeholder="Tenue, matériel, etc..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">➕ Créer</button>
+                    </form>
+                </div>
+
+                <div id="eventsList" class="events-list">
+                    <div class="loading">Chargement...</div>
+                </div>
+            </div>
+
+            <!-- Onglet Vestiaire (messages) -->
+            <div id="lockerTab" class="tab-content">
+                <div class="messages-container">
+                    <div class="chat-area">
+                        <h3>💬 Messages du vestiaire</h3>
+                        <div id="messagesList" class="messages-list">
+                            <!-- Messages ici -->
+                        </div>
+                        
+                        <div class="message-input-area">
+                            <textarea id="messageInput" placeholder="Écrire un message..." rows="2"></textarea>
+                            <div class="message-actions">
+                                <select id="messageRecipient">
+                                    <option value="all">📢 À tout le monde</option>
+                                    <option value="coach">👥 Au coach</option>
+                                </select>
+                                <button id="sendMessageBtn" class="btn-primary">📤 Envoyer</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="pendingRequestsDiv" class="pending-requests hidden">
+                        <h3>📋 Demandes d'adhésion</h3>
+                        <div id="requestsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Joueurs (gestion des joueurs - coach/admin) -->
+            <div id="playersTab" class="tab-content">
+                <div class="players-management">
+                    <h3>👥 Gestion des joueurs</h3>
+                    <div id="playersList" class="players-list"></div>
+                    
+                    <div class="notify-section">
+                        <h4>📢 Relancer les joueurs</h4>
+                        <div class="notify-controls">
+                            <select id="eventSelector">
+                                <option value="">Sélectionner un événement</option>
+                            </select>
+                            <button id="notifyNonRespondersBtn" class="btn-warning">⏰ Relancer les non-répondants</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Toutes les équipes (admin uniquement) -->
+            <div id="teamsTab" class="tab-content">
+                <div class="teams-management">
+                    <h3>🌍 Gestion des équipes</h3>
+                    <div id="allTeamsList" class="teams-list"></div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Notification toast -->
+    <div id="toast" class="toast hidden"></div>
 
     <script src="app.js"></script>
 </body>
